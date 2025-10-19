@@ -155,6 +155,21 @@ fn main() {
                 }
             }
 
+            "position" => {
+                if args.len() != 2 {
+                    println!("用法: position <姓名> <职位>");
+                    continue;
+                }
+
+                let name = args[0];
+                let position = args[1];
+
+                match tree.add_position(name, position) {
+                    Ok(_) => println!("✅ 已为【{}】设置职位：{}", name, position),
+                    Err(e) => eprintln!("❌ {}", e),
+                }
+            }
+
             _ => {
                 println!("未知命令: '{line}'. 输入 'help' 查看可用命令。");
             }

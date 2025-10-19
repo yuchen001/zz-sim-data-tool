@@ -132,6 +132,17 @@ impl FamilyMember {
         }
     }
 
+    /// 添加职位
+    ///
+    /// # param
+    /// - name: 姓名
+    /// - position: 职位
+    pub fn add_position(&mut self, name: &str, position: &str) -> Result<(), String> {
+        self.find_member_by_name_mut(name)
+            .map(|member| member.position = Some(position.to_string()))
+            .ok_or_else(|| format!("未找到成员【{}】", name))
+    }
+
     /// 递归查找并添加单个子节点到指定父节点
     fn add_child_entity(&mut self, parent_name: &str, child: &FamilyMember) {
         if self.name == parent_name {
@@ -244,5 +255,18 @@ impl FamilyMember {
         self.children
             .iter()
             .find_map(|c| c.find_member_by_name(name))
+    }
+
+    /// 在当前家族树中递归查找指定姓名的成员（可变引用版本）。
+    ///
+    /// # Returns
+    /// 若找到则返回 `Some(&mut FamilyMember)`，否则返回 `None`。
+    fn find_member_by_name_mut(&mut self, name: &str) -> Option<&mut FamilyMember> {
+        if self.name == name {
+            return Some(self);
+        }
+        self.children
+            .iter_mut()
+            .find_map(|c| c.find_member_by_name_mut(name))
     }
 }
