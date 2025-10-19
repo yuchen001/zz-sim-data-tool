@@ -33,6 +33,10 @@ const HELP_TEXT: &str = r#"================== 祖宗模拟器帮助 ============
       JSON 格式示例:
       [{"name":"张小明","birth_year":2000,"hoser_power_add":5,"children":[]}]
 
+    save
+      将当前内存中的家族数据保存到 JSON 文件
+      保存到环境变量 ZZ_SIM_FAMILY_DATA 指定的文件
+
 提示:
   - 输入命令时不区分大小写
   - 输入 exit 或按 Ctrl+D 可以退出
@@ -141,6 +145,13 @@ fn main() {
                 let mut json_input = String::new();
                 if io::stdin().read_line(&mut json_input).is_ok() {
                     tree.add_children(&parent, json_input.trim());
+                }
+            }
+
+            "save" => {
+                let json = serde_json::to_string_pretty(&tree).unwrap();
+                if let Err(e) = fs::write(&data, json) {
+                    eprintln!("❌ 保存失败: {e}");
                 }
             }
 
