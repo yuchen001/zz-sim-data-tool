@@ -38,12 +38,6 @@ const HELP_TEXT: &str = r#"================== 祖宗模拟器帮助 ============
   - 输入 exit 或按 Ctrl+D 可以退出
 ===================================================="#;
 
-fn prompt() {
-    // 打印提示符并立刻刷新，否则可能缓存着不显示
-    print!("zz> ");
-    io::stdout().flush().expect("flush stdout failed");
-}
-
 fn get_data_file() -> String {
     match env::var("ZZ_SIM_FAMILY_DATA") {
         Ok(path) => path,
@@ -60,7 +54,8 @@ fn main() {
     let mut tree: FamilyMember = serde_json::from_str(&data).expect("解析数据失败");
 
     loop {
-        prompt();
+        print!("zz> ");
+        io::stdout().flush().unwrap();
 
         let mut input = String::new();
         match io::stdin().read_line(&mut input) {
