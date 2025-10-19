@@ -19,6 +19,14 @@ pub struct FamilyMember {
 }
 
 impl FamilyMember {
+    // 表格列宽常量
+    const TREE_COLUMN_WIDTH: usize = 30; // 树形符号+姓名的总宽度
+    const BIRTH_WIDTH: usize = 8;
+    const TYPE_WIDTH: usize = 12;
+    const POSITION_WIDTH: usize = 18;
+    const ATTR_WIDTH: usize = 8;
+    const CHILD_WIDTH: usize = 8;
+
     /// 计算以当前成员为根的家族树规模（包含所有子孙）。
     ///
     /// # Returns
@@ -40,13 +48,6 @@ impl FamilyMember {
     /// - 若 `name` 为 `None`，则显示以当前成员为根的整棵家族树。
     /// - 若指定 `name`，则仅显示该成员及其子孙。
     pub fn show(&self, name: Option<&str>) {
-        const TREE_COLUMN_WIDTH: usize = 30; // 树形符号+姓名的总宽度
-        const BIRTH_WIDTH: usize = 8;
-        const TYPE_WIDTH: usize = 12;
-        const POSITION_WIDTH: usize = 18;
-        const ATTR_WIDTH: usize = 8;
-        const CHILD_WIDTH: usize = 8;
-
         let border = "━".repeat(80);
 
         println!("{border}");
@@ -55,32 +56,32 @@ impl FamilyMember {
         let header_name = format!(
             "{}{}",
             "姓名",
-            " ".repeat(TREE_COLUMN_WIDTH.saturating_sub("姓名".width()))
+            " ".repeat(Self::TREE_COLUMN_WIDTH.saturating_sub("姓名".width()))
         );
         let header_birth = format!(
             "{}{}",
             "出生",
-            " ".repeat(BIRTH_WIDTH.saturating_sub("出生".width()))
+            " ".repeat(Self::BIRTH_WIDTH.saturating_sub("出生".width()))
         );
         let header_type = format!(
             "{}{}",
             "类别",
-            " ".repeat(TYPE_WIDTH.saturating_sub("类别".width()))
+            " ".repeat(Self::TYPE_WIDTH.saturating_sub("类别".width()))
         );
         let header_position = format!(
             "{}{}",
             "职位",
-            " ".repeat(POSITION_WIDTH.saturating_sub("职位".width()))
+            " ".repeat(Self::POSITION_WIDTH.saturating_sub("职位".width()))
         );
         let header_attr = format!(
             "{}{}",
             "威望+",
-            " ".repeat(ATTR_WIDTH.saturating_sub("威望+".width()))
+            " ".repeat(Self::ATTR_WIDTH.saturating_sub("威望+".width()))
         );
         let header_child = format!(
             "{}{}",
             "子嗣",
-            " ".repeat(CHILD_WIDTH.saturating_sub("子嗣".width()))
+            " ".repeat(Self::CHILD_WIDTH.saturating_sub("子嗣".width()))
         );
 
         println!(
@@ -162,13 +163,6 @@ impl FamilyMember {
     /// * `is_last` - 当前节点是否是父节点的最后一个子节点
     /// * `parent_markers` - 记录每一层的父节点是否是最后一个（用于决定是否画竖线）
     fn show_with_descendants_helper(&self, level: usize, is_last: bool, parent_markers: Vec<bool>) {
-        const TREE_COLUMN_WIDTH: usize = 30; // 树形符号+姓名的总宽度
-        const BIRTH_WIDTH: usize = 8;
-        const TYPE_WIDTH: usize = 12;
-        const POSITION_WIDTH: usize = 18;
-        const ATTR_WIDTH: usize = 8;
-        const CHILD_WIDTH: usize = 8;
-
         // 构建树形前缀
         let mut tree_prefix = String::new();
 
@@ -199,31 +193,31 @@ impl FamilyMember {
 
         // 填充到固定总宽度
         let total_display_width = name_with_tree.width();
-        let padding = TREE_COLUMN_WIDTH.saturating_sub(total_display_width);
+        let padding = Self::TREE_COLUMN_WIDTH.saturating_sub(total_display_width);
         let name_column = format!("{}{}", name_with_tree, " ".repeat(padding));
 
         // 出生年 - 手动填充
         let birth_str = self.birth_year.to_string();
-        let birth_padding = BIRTH_WIDTH.saturating_sub(birth_str.width());
+        let birth_padding = Self::BIRTH_WIDTH.saturating_sub(birth_str.width());
         let birth_padded = format!("{}{}", birth_str, " ".repeat(birth_padding));
 
         // 类别 - 手动填充
-        let type_padding = TYPE_WIDTH.saturating_sub(self.member_type.width());
+        let type_padding = Self::TYPE_WIDTH.saturating_sub(self.member_type.width());
         let type_padded = format!("{}{}", self.member_type, " ".repeat(type_padding));
 
         // 职位 - 手动填充
         let position_str = self.position.as_deref().unwrap_or("-");
-        let position_padding = POSITION_WIDTH.saturating_sub(position_str.width());
+        let position_padding = Self::POSITION_WIDTH.saturating_sub(position_str.width());
         let position_padded = format!("{}{}", position_str, " ".repeat(position_padding));
 
         // 属性+ - 手动填充
         let attr_str = self.hoser_power_add.to_string();
-        let attr_padding = ATTR_WIDTH.saturating_sub(attr_str.width());
+        let attr_padding = Self::ATTR_WIDTH.saturating_sub(attr_str.width());
         let attr_padded = format!("{}{}", attr_str, " ".repeat(attr_padding));
 
         // 子嗣 - 手动填充
         let child_str = self.children.len().to_string();
-        let child_padding = CHILD_WIDTH.saturating_sub(child_str.width());
+        let child_padding = Self::CHILD_WIDTH.saturating_sub(child_str.width());
         let child_padded = format!("{}{}", child_str, " ".repeat(child_padding));
 
         // 直接拼接输出
