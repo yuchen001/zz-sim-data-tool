@@ -105,20 +105,14 @@ impl FamilyMember {
         println!(); // 空行结尾
     }
 
-    /// 批量添加子嗣到指定成员
+    /// 添加子嗣
     ///
-    /// # 参数
+    /// 需要指定是谁的子嗣，可以一次添加多个。
+    /// 并且实现了事务保证。
+    ///
+    /// # param
     /// * `parent_name` - 父辈成员的姓名
     /// * `child_json` - 子嗣信息的 JSON 数组字符串
-    ///
-    /// # 返回值
-    /// * `Ok(usize)` - 成功添加的子嗣数量
-    /// * `Err(String)` - 错误信息（格式错误或重名）
-    ///
-    /// # 事务性保证
-    /// 采用"全部成功或全部失败"策略：
-    /// - 若任一子嗣重名，则所有子嗣都不会被添加
-    /// - 只有全部通过检查后才会执行添加操作
     pub fn add_children(&mut self, parent_name: &str, child_json: &str) {
         let Ok(children_vec) = serde_json::from_str::<Vec<FamilyMember>>(child_json) else {
             eprintln!("添加的子代格式不正确。");
@@ -156,9 +150,9 @@ impl FamilyMember {
         self.show_with_descendants_helper(level, true, Vec::new());
     }
 
-    /// 辅助方法：递归打印家族树，支持树形分支符号
+    /// 递归打印家族树，支持树形分支符号
     ///
-    /// # 参数
+    /// # param
     /// * `level` - 当前层级（0为根节点）
     /// * `is_last` - 当前节点是否是父节点的最后一个子节点
     /// * `parent_markers` - 记录每一层的父节点是否是最后一个（用于决定是否画竖线）
