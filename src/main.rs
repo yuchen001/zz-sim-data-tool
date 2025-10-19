@@ -1,8 +1,8 @@
 mod model;
 use model::FamilyMember;
 use serde_json;
-use std::{env, fs};
 use std::io::{self, Write};
+use std::{env, fs};
 
 const HELP_TEXT: &str = r#"================== 祖宗模拟器帮助 ==================
 命令列表:
@@ -25,6 +25,13 @@ const HELP_TEXT: &str = r#"================== 祖宗模拟器帮助 ============
       如果带参数，显示该成员及其所有后代
       示例: show
             show 李四
+
+    add
+      交互式为指定成员添加子嗣
+      按提示输入父辈姓名与子嗣 JSON 数组
+
+      JSON 格式示例:
+      [{"name":"张小明","birth_year":2000,"hoser_power_add":5,"children":[]}]
 
 提示:
   - 输入命令时不区分大小写
@@ -50,7 +57,7 @@ fn main() {
 
     let data_file = get_data_file();
     let data = fs::read_to_string(data_file).expect("读取数据文件失败");
-    let tree: FamilyMember = serde_json::from_str(&data).expect("解析数据失败");
+    let mut tree: FamilyMember = serde_json::from_str(&data).expect("解析数据失败");
 
     loop {
         prompt();
@@ -74,7 +81,7 @@ fn main() {
 
                 match command.as_str() {
                     "help" => {
-                        println!("{HELP_TEXT}" );
+                        println!("{HELP_TEXT}");
                     }
                     "exit" | "quit" => {
                         break;
@@ -105,6 +112,42 @@ fn main() {
                             tree.show(Some(name));
                         } else {
                             tree.show(None);
+                        }
+                    }
+
+                    "add" => {
+                        println!("📝 添加子嗣模式（输入 'q' 退出）");
+
+                        // 1. 获取父节点
+                        let parent_name = loop {
+                            print!("请输入成员姓名：");
+                            io::stdout().flush().unwrap();
+
+                            let mut input = String::new();
+                            io::stdin().read_line(&mut input).ok();
+                            let name = input.trim();
+
+                            if name.is_empty() {
+                                continue;
+                            }
+
+                            if tree.exists(name) {
+                                break Some(name.to_string());
+                            } else {
+                                println!("【{name}】不存在，请重新输入");
+                            }
+                        };
+
+                        let Some(parent) = parent_name else { continue };
+
+                        // 2. 获取 JSON array 插入子嗣
+                        println!("✅ 找到【{parent}】");
+                        print!("> ");
+                        io::stdout().flush().unwrap();
+
+                        let mut json_input = String::new();
+                        if io::stdin().read_line(&mut json_input).is_ok() {
+                            tree.add_children(&parent, json_input.trim());
                         }
                     }
 
