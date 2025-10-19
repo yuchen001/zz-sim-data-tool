@@ -9,6 +9,7 @@ pub struct FamilyMember {
     pub name: String,
     pub birth_year: u16,
     pub hoser_power_add: u8,
+    pub member_type: String,
 
     #[serde(default)]
     pub position: Option<String>,
