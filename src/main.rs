@@ -58,103 +58,94 @@ fn main() {
         io::stdout().flush().unwrap();
 
         let mut input = String::new();
-        match io::stdin().read_line(&mut input) {
-            Ok(0) => {
-                // EOF
+        if io::stdin().read_line(&mut input).unwrap_or(0) == 0 {
+            // EOF (Ctrl+D)
+            break;
+        }
+
+        let line = input.trim();
+        if line.is_empty() {
+            continue;
+        }
+
+        let mut parts = line.split_whitespace();
+        let command = parts.next().unwrap().to_lowercase();
+        let args: Vec<&str> = parts.collect();
+
+        match command.as_str() {
+            "help" => {
+                println!("{HELP_TEXT}");
+            }
+            "exit" | "quit" => {
                 break;
             }
-            Ok(_) => {
-                // 去掉结尾换行和空白
-                let line = input.trim();
-                if line.is_empty() {
-                    continue;
-                }
 
-                let mut parts = line.split_whitespace();
-                let command = parts.next().unwrap().to_lowercase();
-                let args: Vec<&str> = parts.collect();
+            "count" => {
+                println!("总共的家族人数：{}.", tree.size())
+            }
 
-                match command.as_str() {
-                    "help" => {
-                        println!("{HELP_TEXT}");
-                    }
-                    "exit" | "quit" => {
-                        break;
-                    }
-
-                    "count" => {
-                        println!("总共的家族人数：{}.", tree.size())
-                    }
-
-                    "exists" => {
-                        if args.len() != 1 {
-                            println!("用法: exists <name>");
-                        } else {
-                            let name = args[0];
-                            if tree.exists(name) {
-                                println!("【{name}】存在于家族中。");
-                            } else {
-                                println!("【{name}】不存在于家族中。");
-                            }
-                        }
-                    }
-
-                    "show" => {
-                        if args.len() > 1 {
-                            println!("用法: show [<name>]");
-                        } else if args.len() == 1 {
-                            let name = args[0];
-                            tree.show(Some(name));
-                        } else {
-                            tree.show(None);
-                        }
-                    }
-
-                    "add" => {
-                        println!("📝 添加子嗣模式（输入 'q' 退出）");
-
-                        // 1. 获取父节点
-                        let parent_name = loop {
-                            print!("请输入成员姓名：");
-                            io::stdout().flush().unwrap();
-
-                            let mut input = String::new();
-                            io::stdin().read_line(&mut input).ok();
-                            let name = input.trim();
-
-                            if name.is_empty() {
-                                continue;
-                            }
-
-                            if tree.exists(name) {
-                                break Some(name.to_string());
-                            } else {
-                                println!("【{name}】不存在，请重新输入");
-                            }
-                        };
-
-                        let Some(parent) = parent_name else { continue };
-
-                        // 2. 获取 JSON array 插入子嗣
-                        println!("✅ 找到【{parent}】");
-                        print!("> ");
-                        io::stdout().flush().unwrap();
-
-                        let mut json_input = String::new();
-                        if io::stdin().read_line(&mut json_input).is_ok() {
-                            tree.add_children(&parent, json_input.trim());
-                        }
-                    }
-
-                    _ => {
-                        println!("未知命令: '{line}'. 输入 'help' 查看可用命令。");
+            "exists" => {
+                if args.len() != 1 {
+                    println!("用法: exists <name>");
+                } else {
+                    let name = args[0];
+                    if tree.exists(name) {
+                        println!("【{name}】存在于家族中。");
+                    } else {
+                        println!("【{name}】不存在于家族中。");
                     }
                 }
             }
-            Err(error) => {
-                eprintln!("读取输入失败: {error}");
-                // 读取失败通常不致命，继续下一轮
-                continue;
+
+            "show" => {
+                if args.len() > 1 {
+                    println!("用法: show [<name>]");
+                } else if args.len() == 1 {
+                    let name = args[0];
+                    tree.show(Some(name));
+                } else {
+                    tree.show(None);
+                }
+            }
+
+            "add" => {
+                println!("📝 添加子嗣模式");
+
+                // 1. 获取父节点
+                let parent_name = loop {
+                    print!("请输入成员姓名：");
+                    io::stdout().flush().unwrap();
+
+                    let mut input = String::new();
+                    io::stdin().read_line(&mut input).ok();
+                    let name = input.trim();
+
+                    if name.is_empty() {
+                        continue;
+                    }
+
+                    if tree.exists(name) {
+                        break Some(name.to_string());
+                    } else {
+                        println!("【{name}】不存在，请重新输入");
+                    }
+                };
+
+                let Some(parent) = parent_name else { continue };
+
+                // 2. 获取 JSON array 插入子嗣
+                println!("✅ 找到【{parent}】");
+                print!("> ");
+                io::stdout().flush().unwrap();
+
+                let mut json_input = String::new();
+                if io::stdin().read_line(&mut json_input).is_ok() {
+                    tree.add_children(&parent, json_input.trim());
+                }
+            }
+
+            _ => {
+                println!("未知命令: '{line}'. 输入 'help' 查看可用命令。");
             }
         }
     }
