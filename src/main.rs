@@ -54,7 +54,7 @@ fn main() {
     println!("输入 `help` 查看命令；输入 `exit`/`quit` 或按 Ctrl+D 退出。\n");
 
     let data_file = get_data_file();
-    let data = fs::read_to_string(data_file).expect("读取数据文件失败");
+    let data = fs::read_to_string(&data_file).expect("读取数据文件失败");
     let mut tree: FamilyMember = serde_json::from_str(&data).expect("解析数据失败");
 
     loop {
@@ -150,8 +150,8 @@ fn main() {
 
             "save" => {
                 let json = serde_json::to_string_pretty(&tree).unwrap();
-                if let Err(e) = fs::write(&data, json) {
-                    eprintln!("❌ 保存失败: {e}");
+                if let Err(e) = fs::write(&data_file, json) {
+                    eprintln!("❌ 保存失败: {}", e);
                 }
             }
 
