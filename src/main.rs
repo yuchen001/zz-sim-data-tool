@@ -57,6 +57,8 @@ fn main() {
     let data = fs::read_to_string(&data_file).expect("读取数据文件失败");
     let mut tree: FamilyMember = serde_json::from_str(&data).expect("解析数据失败");
 
+    let mut current_year: Option<u16> = None;
+
     loop {
         print!("zz> ");
         io::stdout().flush().unwrap();
@@ -167,6 +169,23 @@ fn main() {
                 match tree.add_position(name, position) {
                     Ok(_) => println!("✅ 已为【{}】设置职位：{}", name, position),
                     Err(e) => eprintln!("❌ {}", e),
+                }
+            }
+
+            "year" => {
+                if args.is_empty() {
+                    match current_year {
+                        Some(y) => println!("当前年份：{}", y),
+                        None => println!("⚠️  尚未设置当前年份"),
+                    }
+                } else {
+                    match args[0].parse::<u16>() {
+                        Ok(year) => {
+                            current_year = Some(year);
+                            println!("✅ 当前年份设置为 {}", year);
+                        }
+                        Err(_) => println!("❌ 无效的年份"),
+                    }
                 }
             }
 
