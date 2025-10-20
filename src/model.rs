@@ -16,6 +16,9 @@ pub struct FamilyMember {
     pub position: Option<String>,
     #[serde(default)]
     pub children: Vec<FamilyMember>,
+
+    #[serde(default)]
+    pub is_dead: bool,
 }
 
 impl FamilyMember {
@@ -23,6 +26,7 @@ impl FamilyMember {
     const TREE_COLUMN_WIDTH: usize = 30; // 树形符号+姓名的总宽度
     const BIRTH_WIDTH: usize = 8;
     const TYPE_WIDTH: usize = 12;
+    const STATUS_WIDTH: usize = 8;
     const POSITION_WIDTH: usize = 18;
     const ATTR_WIDTH: usize = 8;
     const CHILD_WIDTH: usize = 8;
@@ -68,6 +72,11 @@ impl FamilyMember {
             "类别",
             " ".repeat(Self::TYPE_WIDTH.saturating_sub("类别".width()))
         );
+        let header_status = format!(
+            "{}{}",
+            "状态",
+            " ".repeat(Self::STATUS_WIDTH.saturating_sub("状态".width()))
+        );
         let header_position = format!(
             "{}{}",
             "职位",
@@ -85,8 +94,14 @@ impl FamilyMember {
         );
 
         println!(
-            "{}{}{}{}{}{}",
-            header_name, header_birth, header_type, header_position, header_attr, header_child
+            "{}{}{}{}{}{}{}",
+            header_name,
+            header_birth,
+            header_type,
+            header_status,
+            header_position,
+            header_attr,
+            header_child
         );
 
         println!("{border}");
@@ -223,6 +238,11 @@ impl FamilyMember {
         let type_padding = Self::TYPE_WIDTH.saturating_sub(self.member_type.width());
         let type_padded = format!("{}{}", self.member_type, " ".repeat(type_padding));
 
+        // 状态 - 手动填充
+        let status_str = if self.is_dead { "已故" } else { "" };
+        let status_padding = Self::STATUS_WIDTH.saturating_sub(status_str.width());
+        let status_padded = format!("{}{}", status_str, " ".repeat(status_padding));
+
         // 职位 - 手动填充
         let position_str = self.position.as_deref().unwrap_or("-");
         let position_padding = Self::POSITION_WIDTH.saturating_sub(position_str.width());
@@ -240,8 +260,14 @@ impl FamilyMember {
 
         // 直接拼接输出
         println!(
-            "{}{}{}{}{}{}",
-            name_column, birth_padded, type_padded, position_padded, attr_padded, child_padded
+            "{}{}{}{}{}{}{}",
+            name_column,
+            birth_padded,
+            type_padded,
+            status_padded,
+            position_padded,
+            attr_padded,
+            child_padded
         );
 
         // 递归处理子节点
@@ -323,6 +349,19 @@ impl FamilyMember {
             Ok(())
         } else {
             Err(format!("未找到成员【{}】", old_name))
+        }
+    }
+
+    pub fn mark_dead(&mut self, name: &str) -> Result<(), String> {
+        if let Some(member) = self.find_member_by_name_mut(name) {
+            if member.is_dead {
+                return Err(format!("⚠️ 成员【{}】已被标记为死亡。", name));
+            }
+
+            member.is_dead = true;
+            Ok(())
+        } else {
+            Err(format!("未找到成员【{}】", name))
         }
     }
 }

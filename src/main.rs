@@ -238,6 +238,18 @@ fn main() {
                 }
             }
 
+            "die" => {
+                if args.len() != 1 {
+                    println!("用法：die <姓名>");
+                } else {
+                    let name = args[0];
+                    match tree.mark_dead(name) {
+                        Ok(_) => println!("✅ 已将【{}】标记为死亡。", name),
+                        Err(e) => println!("❌ {}", e),
+                    }
+                }
+            }
+
             _ => {
                 println!("未知命令: '{line}'. 输入 'help' 查看可用命令。");
             }
