@@ -143,6 +143,19 @@ impl FamilyMember {
             .ok_or_else(|| format!("未找到成员【{}】", name))
     }
 
+    pub fn path(&self, name: &str) {
+        let mut path = Vec::new();
+
+        if self.find_path_recursive(name, &mut path) {
+            let names: Vec<&str> = path.iter().map(|m| m.name.as_str()).collect();
+            println!("{}", names.join(" → "));
+        } else {
+            println!("❌ 未找到【{}】", name);
+        }
+    }
+
+    /// --------------------- private -------------------------------------
+
     /// 递归查找并添加单个子节点到指定父节点
     fn add_child_entity(&mut self, parent_name: &str, child: &FamilyMember) {
         if self.name == parent_name {
@@ -268,5 +281,27 @@ impl FamilyMember {
         self.children
             .iter_mut()
             .find_map(|c| c.find_member_by_name_mut(name))
+    }
+
+    /// 递归查找路径（回溯法）
+    fn find_path_recursive<'a>(
+        &'a self,
+        target_name: &str,
+        path: &mut Vec<&'a FamilyMember>,
+    ) -> bool {
+        path.push(self);
+
+        if self.name == target_name {
+            return true;
+        }
+
+        for child in &self.children {
+            if child.find_path_recursive(target_name, path) {
+                return true;
+            }
+        }
+
+        path.pop();
+        false
     }
 }

@@ -189,6 +189,18 @@ fn main() {
                 }
             }
 
+            "stats" => {
+                println!("统计功能待实现");
+            }
+
+            "path" => {
+                if args.len() != 1 {
+                    println!("用法: path <姓名>");
+                } else {
+                    tree.path(args[0]);
+                }
+            }
+
             _ => {
                 println!("未知命令: '{line}'. 输入 'help' 查看可用命令。");
             }
