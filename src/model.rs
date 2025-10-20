@@ -312,4 +312,17 @@ impl FamilyMember {
             item.prune_future_births(year)
         }
     }
+
+    pub fn rename(&mut self, old_name: &str, new_name: &str) -> Result<(), String> {
+        if self.exists(new_name) {
+            return Err(format!("⚠️ 名称【{}】已存在，无法重命名。", new_name));
+        }
+
+        if let Some(member) = self.find_member_by_name_mut(old_name) {
+            member.name = new_name.to_string();
+            Ok(())
+        } else {
+            Err(format!("未找到成员【{}】", old_name))
+        }
+    }
 }

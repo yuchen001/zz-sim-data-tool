@@ -225,6 +225,19 @@ fn main() {
                 }
             },
 
+            "rename" => {
+                if args.len() != 2 {
+                    println!("用法：rename <旧名> <新名>");
+                } else {
+                    let old_name = args[0];
+                    let new_name = args[1];
+                    match tree.rename(old_name, new_name) {
+                        Ok(_) => println!("✅ 已将【{}】改名为【{}】", old_name, new_name),
+                        Err(e) => println!("❌ {}", e),
+                    }
+                }
+            }
+
             _ => {
                 println!("未知命令: '{line}'. 输入 'help' 查看可用命令。");
             }
