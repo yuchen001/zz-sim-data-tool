@@ -201,6 +201,30 @@ fn main() {
                 }
             }
 
+            "prune" => match current_year {
+                None => {
+                    println!("❌ 请先设置年份：year <年份>");
+                }
+                Some(year) => {
+                    println!("⚠️  即将删除 {} 年后出生的所有成员（用于退档）", year);
+                    print!("确认删除？(y/n): ");
+                    io::stdout().flush().unwrap();
+
+                    let mut confirm = String::new();
+                    io::stdin().read_line(&mut confirm).ok();
+
+                    match confirm.trim() {
+                        "y" => tree.prune_future_births(year),
+
+                        "n" => {
+                            println!("❌ 已取消");
+                        }
+
+                        _ => {}
+                    }
+                }
+            },
+
             _ => {
                 println!("未知命令: '{line}'. 输入 'help' 查看可用命令。");
             }

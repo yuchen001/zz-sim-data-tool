@@ -304,4 +304,12 @@ impl FamilyMember {
         path.pop();
         false
     }
+
+    pub fn prune_future_births(&mut self, year: u16) {
+        self.children.retain(|child| child.birth_year <= year);
+
+        for item in &mut self.children {
+            item.prune_future_births(year)
+        }
+    }
 }
