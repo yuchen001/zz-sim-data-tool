@@ -36,7 +36,12 @@ impl FamilyMember {
     /// # Returns
     /// 总成员数量（包括自己）。
     pub fn size(&self) -> usize {
-        1 + self.children.iter().map(|c| c.size()).sum::<usize>()
+        1 + self
+            .children
+            .iter()
+            .filter(|c| !c.is_dead)
+            .map(|c| c.size())
+            .sum::<usize>()
     }
 
     pub fn exists(&self, name: &str) -> bool {
