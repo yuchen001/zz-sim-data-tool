@@ -250,6 +250,11 @@ fn main() {
                 }
             }
 
+            "clear" => {
+                print!("\x1B[2J\x1B[1;1H");
+                std::io::stdout().flush().unwrap();
+            }
+
             _ => {
                 println!("未知命令: '{line}'. 输入 'help' 查看可用命令。");
             }
