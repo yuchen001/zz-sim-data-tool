@@ -2,7 +2,7 @@ mod model;
 use model::FamilyMember;
 use serde_json;
 use std::io::{self, Write};
-use std::{env, fs};
+use std::{env, fs, path::Path};
 
 const HELP_TEXT: &str = r#"================== 祖宗模拟器帮助 ==================
 命令列表:
@@ -55,7 +55,7 @@ fn main() {
 
     let data_file = get_data_file();
     let data = fs::read_to_string(&data_file).expect("读取数据文件失败");
-    let mut tree: FamilyMember = serde_json::from_str(&data).expect("解析数据失败");
+    let mut tree = serde_json::from_str::<FamilyMember>(&data).expect("解析数据失败");
 
     let mut current_year: Option<u16> = None;
 
@@ -252,7 +252,53 @@ fn main() {
 
             "clear" => {
                 print!("\x1B[2J\x1B[1;1H");
-                std::io::stdout().flush().unwrap();
+                io::stdout().flush().unwrap();
+            }
+
+            "inherit" => {
+                if args.len() != 1 {
+                    println!("用法：inherit <姓名>");
+                }
+
+                let Some(year) = current_year else {
+                    println!("❌ 请先执行 year <年份>");
+                    continue;
+                };
+
+                // 确认
+                print!("当前年份 {}，是否归档并继承？(y/n): ", year);
+                io::stdout().flush().unwrap();
+
+                let mut input = String::new();
+                io::stdin().read_line(&mut input).ok();
+
+                if input.trim().to_lowercase() != "y" {
+                    println!("ℹ️ 已取消");
+                    continue;
+                }
+
+                // 归档
+                let archive_path = Path::new(&get_data_file())
+                    .parent()
+                    .unwrap_or(Path::new("."))
+                    .join("archives")
+                    .join(format!("offspring_tree_{}.json", year));
+                if let Ok(json) = serde_json::to_string_pretty(&tree) {
+                    fs::create_dir_all(archive_path.parent().unwrap()).ok();
+                    if fs::write(&archive_path, json).is_ok() {
+                        println!("🗃️ 已归档到 {}", archive_path.display());
+                    }
+                }
+
+                // 继承
+                let name = args[0];
+                match tree.inherit(name) {
+                    Ok(new_tree) => {
+                        tree = new_tree;
+                        println!("✅ 【{}】已继位", args[0]);
+                    }
+                    Err(e) => eprintln!("❌ {}", e),
+                }
             }
 
             _ => {
